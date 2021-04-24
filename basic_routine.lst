@@ -1,0 +1,639 @@
+Argv = basic_routine.asm 
+ 0 error(s) found
+00001:; This now the start of some real code
+00002:; This routine will test the ALU ADC function
+00003:; 01 setups the locations 
+00004:; 02 display operands
+00005:; 03 adds the 16 bit value
+00006: 0420   					ORG 0X000
+00007: 0000 81 00 01				JMP START
+00008: 0003 00					HLT 			;should not stop
+00009: 0004   					ORG 0X0100 		; this is a test
+00010: 0100 39 00 fe	START		LD Y,LED1  		;led location
+00011: 0103 37 ff ff				LD SP,0XFFFF 	;Setup sp
+00012: 0106 5e					MOV SP,CB		;Copy sp to BC
+00013:;The next section does a basic sanity check on computer
+00014:;if it halts here you have a very basic issue in program control flow
+00015:;Uses minimal instructions just in case problems are deep.
+00016: 0107 81 0b 01				JMP NB
+00017: 010a 00					HLT				;Halt here if jmp fails
+00018: 010b c2 10 01	NB      	LD DA,N1
+00019: 010e 84					JMP (DA) 
+00020: 010f 00					HLT				;Halt here if jump DA failed.
+00021: 0110 30 01	N1			LD A,01 		; start valueA
+00022: 0112 10					DEC A			;should be zero
+00023: 0113 83 17 01				JPZ N2			;test
+00024: 0116 00					HLT    			;Jump zero test failed
+00025: 0117 10		N2			DEC	A			; should be neg and not zero
+00026: 0118 85 1c 01				JNZ	N3			;
+00027: 011b 00					HLT				; Jump not zero failed
+00028: 011c 8a 20 01	N3			JNEG N4			;
+00029: 011f 00					HLT				; If here neg jump failed
+00030: 0120 51		N4			MOV A,C 		; save A
+00031: 0121 4a ff				CMP A,0XFF 		; should be equal
+00032: 0123 88 27 01				JEQ N5
+00033: 0126 00					HLT				;Jump equal failed 
+00034: 0127 56		N5			MOV	C,A 		;restore a
+00035: 0128 4a 01				CMP A,0X01		;
+00036: 012a 87 2e 01				JGT N6
+00037: 012d 00					HLT				; Jump greater than failed
+00038: 012e 10		N6			DEC A
+00039: 012f 4a ff				CMP A,0XFF		; Compare A with FF
+00040: 0131 86 35 01				JLT N7
+00041: 0134 00					HLT				;Jmp less than failed
+00042: 0135 41 03	N7			ADD A,0X3 		;should generate carry
+00043: 0137 89 3b 01				JPC N8
+00044: 013a 00					HLT				;Jump carry failed
+00045: 013b 38 92 03	N8			LD	X,JMPPASS	; Here basic jump tests passed 
+00046: 013e 80 54 03				CALL WRITE_STR
+00047: 0141 38 1c 04				LD X,CRLF
+00048: 0144 80 54 03				CALL WRITE_STR
+00049: 0147 30 00				LD A,00			;should be 0
+00050: 0149 12					INC A			;Alu operation should set flags
+00051: 014a 83 6f 01				JPZ FAIL		;test
+00052: 014d 10		N9			DEC A			; should be zero
+00053: 014e 85 6f 01				JNZ	FAIL		;
+00054: 0151 8a 6f 01	N10			JNEG FAIL	
+00055: 0154 51		N11			MOV	A,C 		; save A
+00056: 0155 4a ff				CMP	A,0XFF 		; should be not equal
+00057: 0157 88 6f 01				JEQ FAIL
+00058: 015a 56		N12			MOV	C,A 		;restore a
+00059: 015b 4a 00				CMP A,0X00
+00060: 015d 87 6f 01				JGT FAIL
+00061: 0160 30 04				LD A,0X04
+00062: 0162 4a 02	N13			CMP A,0X02
+00063: 0164 86 6f 01				JLT FAIL
+00064: 0167 41 03	N14			ADD A,0X3 		;should not generate carry
+00065: 0169 89 6f 01				JPC FAIL
+00066: 016c 81 70 01				JMP N15
+00067: 016f 00		FAIL		HLT	
+00068: 0170 38 d6 03	N15			LD X,JMPPASS1
+00069: 0173 80 54 03				CALL WRITE_STR
+00070: 0176 38 1c 04				LD X,CRLF
+00071: 0179 80 54 03				CALL WRITE_STR		
+00072: 017c 38 69 03				LD X,WEL 		;Load msg address
+00073: 017f 80 54 03				CALL WRITE_STR
+00074: 0182 38 1c 04				LD X,CRLF
+00075: 0185 80 54 03				CALL WRITE_STR
+00076: 0188 30 99				LD A,0X99
+00077: 018a 80 92 01				CALL DUMP_REG
+00078: 018d 80 af 02				CALL PRINT256
+00079: 0190 00					HLT
+00080: 0191 8f					RET
+00081:;This routine dumps basic register set to the screen
+00082: 0192 0e		DUMP_REG 	PUSHALL			; Save All
+00083: 0193 38 83 03				LD X,DU
+00084: 0196 80 54 03				CALL WRITE_STR
+00085: 0199 38 1c 04				LD X,CRLF
+00086: 019c 80 54 03				CALL WRITE_STR
+00087: 019f 5d					MOV SP,Y    		; Grab current stack pointer.
+00088: 01a0 17					INC Y				; Point to Y LSB
+00089: 01a1 6d					LD A,(Y+)      		; Load Y LSB
+00090: 01a2 50					MOV A,B
+00091: 01a3 6d					LD A,(Y+) 
+00092: 01a4 80 d8 02				CALL CONV
+00093: 01a7 38 11 04				LD X,MSGY
+00094: 01aa 80 54 03				CALL WRITE_STR
+00095: 01ad 38 d5 02				LD X,CBUF
+00096: 01b0 80 54 03				CALL WRITE_STR
+00097: 01b3 53					MOV B,A
+00098: 01b4 80 d8 02				CALL CONV
+00099: 01b7 38 d5 02				LD X,CBUF
+00100: 01ba 80 54 03				CALL WRITE_STR
+00101: 01bd 38 1e 04				LD X,SPACE
+00102: 01c0 80 54 03				CALL WRITE_STR
+00103: 01c3 6d					LD A,(Y+)      ; Load X LSB
+00104: 01c4 50					MOV A,B
+00105: 01c5 6d					LD A,(Y+) 
+00106: 01c6 80 d8 02				CALL CONV
+00107: 01c9 38 0e 04				LD X,MSGX
+00108: 01cc 80 54 03				CALL WRITE_STR
+00109: 01cf 38 d5 02				LD X,CBUF
+00110: 01d2 80 54 03				CALL WRITE_STR
+00111: 01d5 53					MOV B,A
+00112: 01d6 80 d8 02				CALL CONV
+00113: 01d9 38 d5 02				LD X,CBUF
+00114: 01dc 80 54 03				CALL WRITE_STR
+00115: 01df 38 1e 04				LD X,SPACE
+00116: 01e2 80 54 03				CALL WRITE_STR
+00117: 01e5 6d					LD A,(Y+)      ; Load L LSB
+00118: 01e6 50					MOV A,B
+00119: 01e7 6d					LD A,(Y+) 
+00120: 01e8 80 d8 02				CALL CONV
+00121: 01eb 38 ff 03				LD X,MSGHL
+00122: 01ee 80 54 03				CALL WRITE_STR
+00123: 01f1 38 d5 02				LD X,CBUF
+00124: 01f4 80 54 03				CALL WRITE_STR
+00125: 01f7 53					MOV B,A
+00126: 01f8 80 d8 02				CALL CONV
+00127: 01fb 38 d5 02				LD X,CBUF
+00128: 01fe 80 54 03				CALL WRITE_STR
+00129: 0201 38 1e 04				LD X,SPACE
+00130: 0204 80 54 03				CALL WRITE_STR	
+00131: 0207 6d					LD A,(Y+)      ; Load B LSB
+00132: 0208 50					MOV A,B
+00133: 0209 6d					LD A, (Y+) 
+00134: 020a 80 d8 02				CALL CONV
+00135: 020d 38 fb 03				LD X,MSGCB
+00136: 0210 80 54 03				CALL WRITE_STR
+00137: 0213 38 d5 02				LD X,CBUF
+00138: 0216 80 54 03				CALL WRITE_STR
+00139: 0219 53					MOV B,A
+00140: 021a 80 d8 02				CALL CONV
+00141: 021d 38 d5 02				LD X,CBUF
+00142: 0220 80 54 03				CALL WRITE_STR
+00143: 0223 38 1e 04				LD X,SPACE
+00144: 0226 80 54 03				CALL WRITE_STR
+00145: 0229 6d					LD A,(Y+)      ; Load DA LSB
+00146: 022a 50					MOV A,B
+00147: 022b 6d					LD A,(Y+) 
+00148: 022c 80 d8 02				CALL CONV
+00149: 022f 38 f7 03				LD X,MSGDA
+00150: 0232 80 54 03				CALL WRITE_STR
+00151: 0235 38 d5 02				LD X,CBUF
+00152: 0238 80 54 03				CALL WRITE_STR
+00153: 023b 53					MOV B,A
+00154: 023c 80 d8 02				CALL CONV
+00155: 023f 38 d5 02				LD X,CBUF
+00156: 0242 80 54 03				CALL WRITE_STR
+00157: 0245 38 1e 04				LD X,SPACE
+00158: 0248 80 54 03				CALL WRITE_STR			
+00159: 024b 6d					LD A,(Y+)      ; Load FLAGS 
+00160: 024c 70					PUSH A
+00161: 024d 80 d8 02				CALL CONV
+00162: 0250 38 0b 04				LD X,MSGF
+00163: 0253 80 54 03				CALL WRITE_STR
+00164: 0256 38 d5 02				LD X,CBUF
+00165: 0259 80 54 03				CALL WRITE_STR
+00166: 025c 38 1e 04				LD X,SPACE
+00167: 025f 80 54 03				CALL WRITE_STR
+00168: 0262 78					POP A
+00169: 0263 80 23 03				CALL DSPFLAGS 		; CONVERT VALUE IN A TO FLAGS VALUES
+00170: 0266 68					LD DA,(Y+)      	; Load PC into DA
+00171: 0267 40 01 00				ADD DA,0X0001 		;Adjust to reflect return location
+00172: 026a 80 ea 02				CALL  CONV16
+00173: 026d 38 14 04				LD X,MSGPC
+00174: 0270 80 54 03				CALL WRITE_STR
+00175: 0273 38 e5 02				LD X,CBUF16
+00176: 0276 80 54 03				CALL WRITE_STR
+00177: 0279 38 1e 04				LD X,SPACE
+00178: 027c 80 54 03				CALL WRITE_STR
+00179:; this should be the top of stack before call to the dump routine.
+00180: 027f bb					MOV  Y,DA			; copy y into da
+00181: 0280 80 ea 02				CALL CONV16
+00182: 0283 38 18 04				LD X,MSGSP
+00183: 0286 80 54 03				CALL WRITE_STR
+00184: 0289 38 e5 02				LD X,CBUF16
+00185: 028c 80 54 03				CALL WRITE_STR
+00186: 028f 38 1e 04				LD X,SPACE
+00187: 0292 80 54 03				CALL WRITE_STR
+00188: 0295 38 1c 04				LD	X,CRLF
+00189: 0298 80 54 03				CALL WRITE_STR
+00190: 029b c2 99 99				LD DA,0X9999		;test value
+00191: 029e 80 ea 02				CALL CONV16
+00192: 02a1 38 03 04				LD X,MSGTST
+00193: 02a4 80 54 03				CALL WRITE_STR
+00194: 02a7 38 e5 02				LD X,CBUF16
+00195: 02aa 80 54 03				CALL WRITE_STR		
+00196: 02ad 0f					POPALL
+00197: 02ae 8f					RET		
+00198:;
+00199:; Print from ff to zero
+00200: 02af 0e		PRINT256 	PUSHALL
+00201: 02b0 30 ff				LD A,0XFF
+00202: 02b2 33 10				LD D, 16   ; 16 hex characters to a line
+00203: 02b4 80 d8 02	PNRT1		CALL  CONV
+00204: 02b7 38 d5 02				LD X,CBUF
+00205: 02ba 80 54 03				CALL WRITE_STR
+00206: 02bd 38 1e 04				LD X,SPACE
+00207: 02c0 80 54 03				CALL WRITE_STR
+00208: 02c3 11					DEC D 
+00209: 02c4 85 cf 02				JNZ CONT
+00210: 02c7 38 1c 04				LD X,CRLF
+00211: 02ca 80 54 03				CALL WRITE_STR
+00212: 02cd 33 10				LD D,16		;reload count value
+00213: 02cf 10		CONT		DEC A
+00214: 02d0 85 b4 02				JNZ PNRT1
+00215: 02d3 0f					POPALL
+00216: 02d4 8f					RET
+00217:;Convert value in A to hex and print
+00218:;Will rewirte when more instructions implemented.
+00219: 02d5 00 00	CBUF		 DW 0X0 ; temp store
+00220: 02d7 00					DB 0X0 ;
+00221: 02d8 75		CONV		PUSH X   ; save X
+00222: 02d9 71					PUSH B   ; save B
+00223: 02da 70					PUSH A   ; save A
+00224: 02db 38 d5 02				LD X,CBUF 
+00225: 02de 80 00 03				CALL CONVRTASC ;does the work
+00226: 02e1 78					POP A
+00227: 02e2 79					POP B
+00228: 02e3 7c					POP X
+00229: 02e4 8f					RET
+00230:;Convert value in DA to hex and print
+00231:;Will rewirte when more instructions implemented.
+00232: 02e5 00 00	CBUF16	 	DW 0X0 		; temp store
+00233: 02e7 00 00	CBUF16L	 	DW 0X0 		; LSB
+00234: 02e9 00					DB 0X0 		;
+00235: 02ea 75		CONV16	 	PUSH X   		; save X
+00236: 02eb 71					PUSH B   		; save B
+00237: 02ec 73					PUSH D   		; Save DA no push DA yet
+00238: 02ed 70					PUSH A   		; save A
+00239: 02ee 38 e7 02				LD X,CBUF16L
+00240: 02f1 80 00 03				CALL CONVRTASC ;
+00241: 02f4 59					MOV D,A 		; Load A with MSB
+00242: 02f5 38 e5 02				LD X,CBUF16
+00243: 02f8 80 00 03				CALL CONVRTASC
+00244: 02fb 78					POP A
+00245: 02fc 7d					POP D
+00246: 02fd 79					POP B
+00247: 02fe 7c					POP X
+00248: 02ff 8f					RET
+00249:;This routine takes the value in A and coverts to a hex ascii pointed to by X
+00250:;X = pointer to where character sting to stored
+00251:;A = binary value to convert
+00252:;Modifies A, X, B 
+00253: 0300 70		CONVRTASC	PUSH A
+00254: 0301 31 03				LD B,03
+00255: 0303 28					SLR A
+00256: 0304 4a 09				CMP A,0X9 ;Is 0-9
+00257: 0306 87 0e 03				JGT HEXA16
+00258: 0309 41 30				ADD A,'0'
+00259: 030b 81 10 03				JMP STR16MSB
+00260: 030e 41 37	HEXA16   	ADD A,0X37
+00261: 0310 60		STR16MSB 	ST A,(X)
+00262: 0311 16					INC X
+00263: 0312 78					POP A
+00264: 0313 20 0f				AND A,0XF ; Mask low bits
+00265: 0315 4a 09				CMP A,0X9 ;Is 0-9
+00266: 0317 87 1f 03				JGT HEXB16
+00267: 031a 41 30				ADD A,'0'
+00268: 031c 81 21 03				JMP STR16LSB
+00269: 031f 41 37	HEXB16   	ADD A,0X37
+00270: 0321 60		STR16LSB 	ST A,(X)
+00271: 0322 8f					RET
+00272:;This routine takes the 8 bit value passed in A and converts to the flags
+00273:;  128  64  32  16  8   4   2   1
+00274:; +---+---+---+---+---+---+---+---+		
+00275:; | S | M | - | < | > | = | C | Z |
+00276:; +---+---+---+---+---+---+---+---+
+00277:; all registers are saved upon entry and restored on exit
+00278:;
+00279:;
+00280:;
+00281: 0323 0e		DSPFLAGS 	PUSHALL ;SAVE REG		
+00282: 0324 39 00 fe				LD Y,LED1
+00283: 0327 3e 07				LD H,0X7 ; COUNT
+00284: 0329 52					MOV A,D
+00285: 032a 38 4b 03				LD X,FLAGASC
+00286: 032d 32 00				LD C,0X0	;SHIFT AMOUNT due to hardware this is one shift
+00287: 032f 2a		LOOP1		SLR D
+00288: 0330 89 37 03				JPC FLAGFOUND
+00289: 0333 16					INC X
+00290: 0334 81 3e 03				JMP PRINTSPC
+00291: 0337 6c		FLAGFOUND 	LD A,(X+)
+00292: 0338 80 65 03				CALL WRITEA
+00293: 033b 81 43 03				JMP CHECKEND
+00294: 033e 30 20	PRINTSPC 	LD A,0X20
+00295: 0340 80 65 03				CALL WRITEA
+00296: 0343 07		CHECKEND 	MOV H,A
+00297: 0344 10					DEC A
+00298: 0345 05					MOV A,H
+00299: 0346 85 2f 03				JNZ LOOP1
+00300: 0349 0f					POPALL
+00301: 034a 8f					RET
+00302: 034b 5a 43 3d FLAGASC 	DS "ZC=><-MS"
+00303:;
+00304:;
+00305:; Write string requires X to point to string. String is standard null terminated
+00306: 0354 70		WRITE_STR	PUSH A
+00307: 0355 76					PUSH Y
+00308: 0356 39 00 fe				LD Y,LED1 
+00309: 0359 6c		WRITE2		LD A,(X+)
+00310: 035a 80 65 03				CALL WRITEA
+00311: 035d 41 00				ADD A,0 	;Test for zero CMP not yet implemented
+00312: 035f 85 59 03				JNZ WRITE2
+00313: 0362 7b					POP	Y
+00314: 0363 78					POP	A
+00315: 0364 8f					RET
+00316:; Write asumes Y reg is pointing to the terminal address 
+00317:;		
+00318: 0365 70		WRITEA  	PUSH A
+00319: 0366 61					ST A,(Y) 
+00320: 0367 78					POP A
+00321: 0368 8f					RET
+00322: 0369 			LED1    	EQU 0XFE00 ;led location
+00323: 0369 56 65 72 .. WEL			DS "Version 1.0 test routines"	
+00324: 0383 44 75 6d .. DU			DS "Dump registers"
+00325: 0392 4a 75 6d .. JMPPASS 	DS "Jump tests passed in test and jump also includes basic instructions"
+00326: 03d6 4a 75 6d .. JMPPASS1 	DS "Jump tests passed negitive tests"
+00327: 03f7 44 41 3d MSGDA		DS "DA="
+00328: 03fb 43 42 3d MSGCB		DS "CB="
+00329: 03ff 48 4c 3d MSGHL		DS "HL="
+00330: 0403 74 65 73 MSGTST		DS "test99="
+00331: 040b 46		MSGF		DB 'F'
+00332: 040c 3d					DB '='
+00333: 040d 00					DB 0X0
+00334: 040e 58		MSGX		DB 'X'
+00335: 040f 3d					DB '='
+00336: 0410 00					DB 0X0
+00337: 0411 59		MSGY		DB 'Y'
+00338: 0412 3d					DB '='
+00339: 0413 00					DB 0X0
+00340: 0414 50		MSGPC		DB 'P'
+00341: 0415 43					DB 'C'
+00342: 0416 3d					DB '='
+00343: 0417 00					DB 0X0
+00344: 0418 53		MSGSP		DB 'S'
+00345: 0419 50					DB 'P'
+00346: 041a 3d					DB '='
+00347: 041b 00					DB 0X0
+00348: 041c 0a		CRLF		DB '\n'
+00349: 041d 00					DB '\0'
+00350: 041e 20		SPACE		DB ' '
+00351: 041f 00					DB 0X0
+ 0 error(s) found
+START: 0100 line: 10
+Address: 0000 
+line: 0007 
+
+LED1: fe00 line: 322
+Address: 0100 0324 0356 
+line: 0010 011a 0134 
+
+NB: 010b line: 18
+Address: 0107 
+line: 0016 
+
+N1: 0110 line: 21
+Address: 010b 
+line: 0018 
+
+N2: 0117 line: 25
+Address: 0113 
+line: 0023 
+
+N3: 011c line: 28
+Address: 0118 
+line: 0026 
+
+N4: 0120 line: 30
+Address: 011c 
+line: 0028 
+
+N5: 0127 line: 34
+Address: 0123 
+line: 0032 
+
+N6: 012e line: 38
+Address: 012a 
+line: 0036 
+
+N7: 0135 line: 42
+Address: 0131 
+line: 0040 
+
+N8: 013b line: 45
+Address: 0137 
+line: 0043 
+
+JMPPASS: 0392 line: 325
+Address: 013b 
+line: 0045 
+
+WRITE_STR: 0354 line: 306
+Address: 013e 0144 0173 0179 017f 0185 0196 019c 01aa 01b0 01ba 01c0 01cc 01d2 01dc 01e2 01ee 01f4 01fe 0204 0210 0216 0220 0226 0232 0238 0242 0248 0253 0259 025f 0270 0276 027c 0286 028c 0292 0298 02a4 02aa 02ba 02c0 02ca 
+line: 0046 0030 0045 0047 0049 004b 0054 0056 005e 0060 0064 0066 006c 006e 0072 0074 007a 007c 0080 0082 0088 008a 008e 0090 0096 0098 009c 009e 00a3 00a5 00a7 00ae 00b0 00b2 00b7 00b9 00bb 00bd 00c1 00c3 00cd 00cf 00d3 
+
+CRLF: 041c line: 348
+Address: 0141 0176 0182 0199 0295 02c7 
+line: 0047 0046 004a 0055 00bc 00d2 
+
+FAIL: 016f line: 67
+Address: 014a 014e 0151 0157 015d 0164 0169 
+line: 0051 0035 0036 0039 003c 003f 0041 
+
+N9: 014d line: 52
+
+N10: 0151 line: 54
+
+N11: 0154 line: 55
+
+N12: 015a line: 58
+
+N13: 0162 line: 62
+
+N14: 0167 line: 64
+
+N15: 0170 line: 68
+Address: 016c 
+line: 0066 
+
+JMPPASS1: 03d6 line: 326
+Address: 0170 
+line: 0068 
+
+WEL: 0369 line: 323
+Address: 017c 
+line: 0072 
+
+DUMP_REG: 0192 line: 82
+Address: 018a 
+line: 0077 
+
+PRINT256: 02af line: 200
+Address: 018d 
+line: 0078 
+
+DU: 0383 line: 324
+Address: 0193 
+line: 0083 
+
+CONV: 02d8 line: 221
+Address: 01a4 01b4 01c6 01d6 01e8 01f8 020a 021a 022c 023c 024d 02b4 
+line: 0092 0062 006a 0070 0078 007e 0086 008c 0094 009a 00a1 00cb 
+
+MSGY: 0411 line: 337
+Address: 01a7 
+line: 0093 
+
+CBUF: 02d5 line: 219
+Address: 01ad 01b7 01cf 01d9 01f1 01fb 0213 021d 0235 023f 0256 02b7 02db 
+line: 0095 0063 006d 0071 007b 007f 0089 008d 0097 009b 00a4 00cc 00e0 
+
+SPACE: 041e line: 350
+Address: 01bd 01df 0201 0223 0245 025c 0279 028f 02bd 
+line: 0101 0073 0081 008f 009d 00a6 00b1 00ba 00ce 
+
+MSGX: 040e line: 334
+Address: 01c9 
+line: 0107 
+
+MSGHL: 03ff line: 329
+Address: 01eb 
+line: 0121 
+
+MSGCB: 03fb line: 328
+Address: 020d 
+line: 0135 
+
+MSGDA: 03f7 line: 327
+Address: 022f 
+line: 0149 
+
+MSGF: 040b line: 331
+Address: 0250 
+line: 0162 
+
+DSPFLAGS: 0323 line: 281
+Address: 0263 
+line: 0169 
+
+CONV16: 02ea line: 235
+Address: 026a 0280 029e 
+line: 0172 00b5 00bf 
+
+MSGPC: 0414 line: 340
+Address: 026d 
+line: 0173 
+
+CBUF16: 02e5 line: 232
+Address: 0273 0289 02a7 02f5 
+line: 0175 00b8 00c2 00f2 
+
+MSGSP: 0418 line: 344
+Address: 0283 
+line: 0182 
+
+MSGTST: 0403 line: 330
+Address: 02a1 
+line: 0192 
+
+PNRT1: 02b4 line: 203
+Address: 02d0 
+line: 0214 
+
+CONT: 02cf line: 213
+Address: 02c4 
+line: 0209 
+
+CONVRTASC: 0300 line: 253
+Address: 02de 02f1 02f8 
+line: 0225 00f0 00f3 
+
+CBUF16L: 02e7 line: 233
+Address: 02ee 
+line: 0239 
+
+HEXA16: 030e line: 260
+Address: 0306 
+line: 0257 
+
+STR16MSB: 0310 line: 261
+Address: 030b 
+line: 0259 
+
+HEXB16: 031f line: 269
+Address: 0317 
+line: 0266 
+
+STR16LSB: 0321 line: 270
+Address: 031c 
+line: 0268 
+
+FLAGASC: 034b line: 302
+Address: 032a 
+line: 0285 
+
+LOOP1: 032f line: 287
+Address: 0346 
+line: 0299 
+
+FLAGFOUND: 0337 line: 291
+Address: 0330 
+line: 0288 
+
+PRINTSPC: 033e line: 294
+Address: 0334 
+line: 0290 
+
+WRITEA: 0365 line: 318
+Address: 0338 0340 035a 
+line: 0292 0127 0136 
+
+CHECKEND: 0343 line: 296
+Address: 033b 
+line: 0293 
+
+WRITE2: 0359 line: 309
+Address: 035f 
+line: 0312 
+
+Hex dump
+
+0000:81 00 01 00 00 00 00 00 00 00 00 00 00 00 00 00 
+0010:00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+0020:00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+0030:00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+0040:00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+0050:00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+0060:00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+0070:00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+0080:00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+0090:00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+00a0:00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+00b0:00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+00c0:00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+00d0:00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+00e0:00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+00f0:00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+0100:39 00 fe 37 ff ff 5e 81 0b 01 00 c2 10 01 84 00 
+0110:30 01 10 83 17 01 00 10 85 1c 01 00 8a 20 01 00 
+0120:51 4a ff 88 27 01 00 56 4a 01 87 2e 01 00 10 4a 
+0130:ff 86 35 01 00 41 03 89 3b 01 00 38 92 03 80 54 
+0140:03 38 1c 04 80 54 03 30 00 12 83 6f 01 10 85 6f 
+0150:01 8a 6f 01 51 4a ff 88 6f 01 56 4a 00 87 6f 01 
+0160:30 04 4a 02 86 6f 01 41 03 89 6f 01 81 70 01 00 
+0170:38 d6 03 80 54 03 38 1c 04 80 54 03 38 69 03 80 
+0180:54 03 38 1c 04 80 54 03 30 99 80 92 01 80 af 02 
+0190:00 8f 0e 38 83 03 80 54 03 38 1c 04 80 54 03 5d 
+01a0:17 6d 50 6d 80 d8 02 38 11 04 80 54 03 38 d5 02 
+01b0:80 54 03 53 80 d8 02 38 d5 02 80 54 03 38 1e 04 
+01c0:80 54 03 6d 50 6d 80 d8 02 38 0e 04 80 54 03 38 
+01d0:d5 02 80 54 03 53 80 d8 02 38 d5 02 80 54 03 38 
+01e0:1e 04 80 54 03 6d 50 6d 80 d8 02 38 ff 03 80 54 
+01f0:03 38 d5 02 80 54 03 53 80 d8 02 38 d5 02 80 54 
+0200:03 38 1e 04 80 54 03 6d 50 6d 80 d8 02 38 fb 03 
+0210:80 54 03 38 d5 02 80 54 03 53 80 d8 02 38 d5 02 
+0220:80 54 03 38 1e 04 80 54 03 6d 50 6d 80 d8 02 38 
+0230:f7 03 80 54 03 38 d5 02 80 54 03 53 80 d8 02 38 
+0240:d5 02 80 54 03 38 1e 04 80 54 03 6d 70 80 d8 02 
+0250:38 0b 04 80 54 03 38 d5 02 80 54 03 38 1e 04 80 
+0260:54 03 78 80 23 03 68 40 01 00 80 ea 02 38 14 04 
+0270:80 54 03 38 e5 02 80 54 03 38 1e 04 80 54 03 bb 
+0280:80 ea 02 38 18 04 80 54 03 38 e5 02 80 54 03 38 
+0290:1e 04 80 54 03 38 1c 04 80 54 03 c2 99 99 80 ea 
+02a0:02 38 03 04 80 54 03 38 e5 02 80 54 03 0f 8f 0e 
+02b0:30 ff 33 10 80 d8 02 38 d5 02 80 54 03 38 1e 04 
+02c0:80 54 03 11 85 cf 02 38 1c 04 80 54 03 33 10 10 
+02d0:85 b4 02 0f 8f 00 00 00 75 71 70 38 d5 02 80 00 
+02e0:03 78 79 7c 8f 00 00 00 00 00 75 71 73 70 38 e7 
+02f0:02 80 00 03 59 38 e5 02 80 00 03 78 7d 79 7c 8f 
+0300:70 31 03 28 4a 09 87 0e 03 41 30 81 10 03 41 37 
+0310:60 16 78 20 0f 4a 09 87 1f 03 41 30 81 21 03 41 
+0320:37 60 8f 0e 39 00 fe 3e 07 52 38 4b 03 32 00 2a 
+0330:89 37 03 16 81 3e 03 6c 80 65 03 81 43 03 30 20 
+0340:80 65 03 07 10 05 85 2f 03 0f 8f 5a 43 3d 3e 3c 
+0350:2d 4d 53 00 70 76 39 00 fe 6c 80 65 03 41 00 85 
+0360:59 03 7b 78 8f 70 61 78 8f 56 65 72 73 69 6f 6e 
+0370:20 31 2e 30 20 74 65 73 74 20 72 6f 75 74 69 6e 
+0380:65 73 00 44 75 6d 70 20 72 65 67 69 73 74 65 72 
+0390:73 00 4a 75 6d 70 20 74 65 73 74 73 20 70 61 73 
+03a0:73 65 64 20 69 6e 20 74 65 73 74 20 61 6e 64 20 
+03b0:6a 75 6d 70 20 61 6c 73 6f 20 69 6e 63 6c 75 64 
+03c0:65 73 20 62 61 73 69 63 20 69 6e 73 74 72 75 63 
+03d0:74 69 6f 6e 73 00 4a 75 6d 70 20 74 65 73 74 73 
+03e0:20 70 61 73 73 65 64 20 6e 65 67 69 74 69 76 65 
+03f0:20 74 65 73 74 73 00 44 41 3d 00 43 42 3d 00 48 
+0400:4c 3d 00 74 65 73 74 39 39 3d 00 46 3d 00 58 3d 
+0410:00 59 3d 00 50 43 3d 00 53 50 3d 00 0a 00 20 00 
+0420:00 

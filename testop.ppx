@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<settings version="1.0">
+	<category name="main.c">
+		<category name="Window">
+			<property name="Left" type="integer">183</property>
+			<property name="Top" type="integer">183</property>
+			<property name="Right" type="integer">2599</property>
+			<property name="Bottom" type="integer">1372</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+		<category name="Breakpoints">
+			<category name="Breakpoint1">
+				<property name="Line" type="integer">536</property>
+				<property name="Enabled" type="integer">0</property>
+				<property name="HitCount" type="integer">0</property>
+				<property name="Expression" type="string"></property>
+			</category>
+			<category name="Breakpoint2">
+				<property name="Line" type="integer">446</property>
+				<property name="Enabled" type="integer">0</property>
+				<property name="HitCount" type="integer">0</property>
+				<property name="Expression" type="string"></property>
+			</category>
+			<category name="Breakpoint3">
+				<property name="Line" type="integer">636</property>
+				<property name="Enabled" type="integer">0</property>
+				<property name="HitCount" type="integer">0</property>
+				<property name="Expression" type="string"></property>
+			</category>
+			<category name="Breakpoint4">
+				<property name="Line" type="integer">843</property>
+				<property name="Enabled" type="integer">0</property>
+				<property name="HitCount" type="integer">0</property>
+				<property name="Expression" type="string"></property>
+			</category>
+			<category name="Breakpoint5">
+				<property name="Line" type="integer">848</property>
+				<property name="Enabled" type="integer">0</property>
+				<property name="HitCount" type="integer">0</property>
+				<property name="Expression" type="string"></property>
+			</category>
+			<category name="Breakpoint6">
+				<property name="Line" type="integer">762</property>
+				<property name="Enabled" type="integer">0</property>
+				<property name="HitCount" type="integer">0</property>
+				<property name="Expression" type="string"></property>
+			</category>
+			<category name="Breakpoint7">
+				<property name="Line" type="integer">790</property>
+				<property name="Enabled" type="integer">0</property>
+				<property name="HitCount" type="integer">0</property>
+				<property name="Expression" type="string"></property>
+			</category>
+			<category name="Breakpoint8">
+				<property name="Line" type="integer">626</property>
+				<property name="Enabled" type="integer">0</property>
+				<property name="HitCount" type="integer">0</property>
+				<property name="Expression" type="string"></property>
+			</category>
+			<category name="Breakpoint9">
+				<property name="Line" type="integer">286</property>
+				<property name="Enabled" type="integer">0</property>
+				<property name="HitCount" type="integer">0</property>
+				<property name="Expression" type="string"></property>
+			</category>
+			<category name="Breakpoint10">
+				<property name="Line" type="integer">567</property>
+				<property name="Enabled" type="integer">1</property>
+				<property name="HitCount" type="integer">0</property>
+				<property name="Expression" type="string"></property>
+			</category>
+		</category>
+	</category>
+	<category name="..\create_opcode_list\mycpu.h">
+		<category name="Window">
+			<property name="Left" type="integer">244</property>
+			<property name="Top" type="integer">244</property>
+			<property name="Right" type="integer">2660</property>
+			<property name="Bottom" type="integer">1433</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+	</category>
+	<category name="Debugger">
+		<category name="Watches">
+			<property name="Watch1" type="string">argv[1]</property>
+			<property name="Watch2" type="string">s</property>
+		</category>
+	</category>
+	<category name="symbolTable.c">
+		<category name="Window">
+			<property name="Left" type="integer">305</property>
+			<property name="Top" type="integer">305</property>
+			<property name="Right" type="integer">2721</property>
+			<property name="Bottom" type="integer">1494</property>
+			<property name="Maximized" type="integer">0</property>
+			<property name="Active" type="integer">0</property>
+		</category>
+		<category name="Breakpoints">
+			<category name="Breakpoint1">
+				<property name="Line" type="integer">125</property>
+				<property name="Enabled" type="integer">1</property>
+				<property name="HitCount" type="integer">0</property>
+				<property name="Expression" type="string"></property>
+			</category>
+		</category>
+	</category>
+</settings>
