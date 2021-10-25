@@ -40,12 +40,13 @@ The path I have taken once I have built the syntax of instruction I search the o
 taking this path ensures the assembler is completely table driven. for example
 
 ```assembly
-label1	ld a,(x-)   ; actual syntax is valid but no opcode    
+label1	ld a,(x-)   ; actual syntax is valid but no  valid opcode    
 ```
 
-This instruction current is not implemented but from the view of the syntax is says   
+This instruction currently is not implemented but from the view of the syntax is says   
 
-At label1 load A via the point register X and decrement X.  This line is parsed correctly and the build a structure from the parse tree. 
+At label1 load A via the point register X and decrement X.  This line is parsed correctly and the builds a structure from the parse tree. 
+But when it goes to find a valid op code to match its template there is no valid match so will fail at this point.
 
 ```c
 struct op_code {
@@ -60,9 +61,9 @@ struct op_code {
 		 };
 ```
 
-The parser uses tables supplied by the micro-code  building process to help it fill in the structure.
+The parser uses tables supplied by the micro-code building process to help it fill in the structure.
 
-For example  where it is expecting an instruction the lexer  will return a symbol. The parser will next use the correct look up table for either instruction of register. There is a special register value to indicate a constant value. This value is resolved at assembly time  not runtime. 
+For example  where it is expecting an instruction the lexer will return a symbol. The parser will next use the correct look up table for either instruction or register. There is a special register value to indicate a constant value. This value is resolved at assembly time not runtime. 
 
-It is possible to past the instruction register assignment phase  and then fail to find a valid opcode in the op code table.
+It is possible to pass the instruction register assignment phase and then fail to find a valid opcode in the op code table.
 
